@@ -1,0 +1,73 @@
+<!-- @author Gustavo Y. Maruyama <gustavo.maruyama@ifms.edu.br> -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Exemplo - MQTT WEB Client</title>
+	<link rel="stylesheet" href="main.css">
+	<script src="node_modules\mqtt\dist\mqtt.min.js"></script>
+</head>
+
+<body>
+	<div class="navbar">
+		<p class="left">IoT</p>
+		<p class="right">Gustavo Y. Maruyama</p>
+	</div>
+	
+	<div class="content">
+		<h2>Laboratório 07</h2>
+		<h3>Temperatura - Sala</h3>
+		<hr class="dotted">
+		<div id="message-card" class="card">
+			<p>--</p>
+		</div>
+	</div>
+	
+	<div class="content">
+		<h3>Estado LED</h3>
+		<hr class="dotted">
+		<button class="btn success" onclick="ligar()">Ligar</button>
+		<button class="btn danger" onclick="desligar()">Desligar</button>
+	</div>
+	
+</body>
+
+<script>
+   	const MQTT_BROKER_ADDRESS = "ws://127.0.0.1";
+	const MQTT_BROKER_PORT = "8080";
+	
+	const MQTT_TOPIC = "sala/temperatura";
+
+	// Realiza a conexão com o broker
+	const client  = mqtt.connect(MQTT_BROKER_ADDRESS+":"+MQTT_BROKER_PORT);
+
+	// Função de callback que é executada quando a conexão com o broker é estabelecida 
+	client.on('connect', function () {
+	  console.log("Conectado ao broker.");
+	  
+	  // Realiza um subscribe no tópico indicado;
+	  client.subscribe(MQTT_TOPIC);
+	  
+	});
+	
+	// Função de callback que é executada quando uma mensagem é recebida 
+	client.on('message', function (topic, message) {
+		const obj = JSON.parse(message);
+		
+		const card = document.getElementById("message-card"); 
+		const cardContent = card.getElementsByTagName("p")[0];
+		
+		cardContent.innerHTML = obj.temperature +"ºC";
+	});
+	
+	function ligar(){
+		client.publish("dispositivo/comando","1");
+	}
+	function desligar(){
+		client.publish("dispositivo/comando","0");
+	}
+</script>
+
+</html>
